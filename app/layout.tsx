@@ -11,7 +11,7 @@ const inter = Inter({ subsets: ["latin"] })
 export const metadata: Metadata = {
   title: "Appliga - Application E-commerce à Vendre",
   description: "Application e-commerce clé en main avec réduction de 30%",
-    generator: 'v0.dev'
+    generator: 'next.dev'
 }
 
 export default function RootLayout({
