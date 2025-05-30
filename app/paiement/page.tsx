@@ -6,6 +6,7 @@ import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
+import { payment } from "./action/payment"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -14,17 +15,45 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 
 export default function PaiementPage() {
   const [paymentStatus, setPaymentStatus] = useState<"pending" | "processing" | "success" | "error">("pending")
-
-  const handleSubmit = (e) => {
-    e.preventDefault()
-    setPaymentStatus("processing")
-
-    // Simuler un traitement de paiement
-    setTimeout(() => {
-      setPaymentStatus("success")
-    }, 2000)
-  }
-
+  // États pour le formulaire Mobile Money
+  const [fullName, setFullName] = useState("")
+  const [email, setEmail] = useState("")
+  const [phone, setPhone] = useState("")
+  const [operator, setOperator] = useState("airtel")
+  const [pin, setPin] = useState("")
+  const price = "655 000 FCFA"
+  const handleMobileMoneySubmit = async (e: React.FormEvent) => {
+    if (operator !== "airtel" && operator !== "moov") {
+      alert("Veuillez sélectionner un opérateur valide");
+      return;
+    }
+    e.preventDefault();
+    setPaymentStatus("processing");
+  
+    try {
+      const result = await payment({
+        fullName,
+        email,
+        phone,
+        operator,
+        pin, // Note: En production, évitez d'envoyer le PIN au serveur
+        amount: 655000, // Montant en FCFA
+        description: "Achat application Appliga",
+        reference: `APP-${Date.now().toString().slice(-8)}`,
+        payerMsisdn: ""
+      });
+  
+      if (result.success) {
+        setPaymentStatus("success");
+      } else {
+        setPaymentStatus("error");
+        // Afficher un message d'erreur
+      }
+    } catch (error) {
+      setPaymentStatus("error");
+      console.error("Erreur:", error);
+    }
+  };
   return (
     <div className="flex flex-col min-h-screen">
       {/* Hero Section */}
@@ -57,26 +86,26 @@ export default function PaiementPage() {
                   <CardContent className="pt-6">
                     <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
                       <p className="text-green-800">
-                        Un email de confirmation a été envoyé à <strong>client@example.com</strong> avec tous les
+                        Un email de confirmation a été envoyé à <strong>{email}</strong> avec tous les
                         détails de votre achat et les prochaines étapes.
                       </p>
                     </div>
                     <div className="space-y-4">
                       <div className="flex justify-between">
                         <span className="font-semibold">Numéro de commande:</span>
-                        <span>#APP-20240522-1234</span>
+                        <span>#APP-{new Date().getTime().toString().slice(-8)}</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="font-semibold">Date:</span>
-                        <span>22/05/2024</span>
+                        <span>{new Date().toLocaleDateString()}</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="font-semibold">Montant:</span>
-                        <span>655 000 FCFA</span>
+                        <span>{price}</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="font-semibold">Méthode de paiement:</span>
-                        <span>Carte bancaire</span>
+                        <span>Mobile Money ({operator === "airtel" ? "Airtel Money" : "Moov Money"})</span>
                       </div>
                     </div>
                     <div className="mt-8">
@@ -134,7 +163,7 @@ export default function PaiementPage() {
                             <p className="text-sm text-gray-500 mt-2">Veuillez ne pas fermer cette page</p>
                           </div>
                         ) : (
-                          <form onSubmit={handleSubmit} className="space-y-6">
+                          <form onSubmit={handleMobileMoneySubmit} className="space-y-6">
                             <div className="space-y-2">
                               <Label htmlFor="cardName">Nom sur la carte</Label>
                               <Input id="cardName" placeholder="Nom complet" required />
@@ -171,7 +200,7 @@ export default function PaiementPage() {
                               <span>Vos informations de paiement sont sécurisées</span>
                             </div>
                             <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700">
-                              Payer 655 000 FCFA
+                              Payer {price}
                             </Button>
                           </form>
                         )}
@@ -201,10 +230,73 @@ export default function PaiementPage() {
                             <p className="text-sm text-gray-500 mt-2">Veuillez ne pas fermer cette page</p>
                           </div>
                         ) : (
-                          <form onSubmit={handleSubmit} className="space-y-6">
+                          <form onSubmit={async (e) => {
+                            e.preventDefault();
+                            if (operator !== "airtel" && operator !== "moov") {
+                              alert("Veuillez sélectionner un opérateur valide");
+                              return;
+                            }
+                            setPaymentStatus("processing");
+
+                            // Affiche les infos dans la console (ou envoie-les à ton backend)
+                             await payment({
+                               fullName,
+                               email,
+                               phone,
+                               operator,
+                               pin, // Note: En production, évitez d'envoyer le PIN au serveur
+                               amount: 655000, // Montant en FCFA
+                               description: "Achat application Appliga",
+                               reference: `APP-${Date.now().toString().slice(-8)}`,
+                               payerMsisdn: ""
+                             });
+
+                            setTimeout(() => {
+                              setPaymentStatus("success");
+                            }, 2000);
+                          }} className="space-y-6">
+
+                            <div className="space-y-2">
+                              <Label htmlFor="fullName">Nom complet</Label>
+                              <Input
+                                id="fullName"
+                                value={fullName}
+                                onChange={(e) => setFullName(e.target.value)}
+                                placeholder="Votre nom complet"
+                                required
+                              />
+                            </div>
+
+                            <div className="space-y-2">
+                              <Label htmlFor="email">Email</Label>
+                              <Input
+                                id="email"
+                                type="email"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                placeholder="votre@email.com"
+                                required
+                              />
+                            </div>
+
+                            <div className="space-y-2">
+                              <Label htmlFor="phone">Téléphone</Label>
+                              <Input
+                                id="phone"
+                                value={phone}
+                                onChange={(e) => setPhone(e.target.value)}
+                                placeholder="+241 XX XX XX XX"
+                                required
+                              />
+                            </div>
+
                             <div className="space-y-2">
                               <Label>Opérateur Mobile Money</Label>
-                              <RadioGroup defaultValue="airtel" className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                              <RadioGroup
+                                value={operator}
+                                onValueChange={setOperator}
+                                className="grid grid-cols-1 md:grid-cols-2 gap-4"
+                              >
                                 <div className="border rounded-lg p-4 cursor-pointer [&:has(:checked)]:bg-blue-50 [&:has(:checked)]:border-blue-600">
                                   <RadioGroupItem id="airtel" value="airtel" className="sr-only" />
                                   <Label htmlFor="airtel" className="flex items-center gap-2 cursor-pointer">
@@ -230,24 +322,29 @@ export default function PaiementPage() {
                                 </div>
                               </RadioGroup>
                             </div>
+
                             <div className="space-y-2">
-                              <Label htmlFor="mobileNumber">Numéro de téléphone Mobile Money</Label>
-                              <Input id="mobileNumber" placeholder="+241 XX XX XX XX" required />
-                            </div>
-                            <div className="space-y-2">
-                              <Label htmlFor="mobilePassword">Code secret / PIN</Label>
-                              <Input id="mobilePassword" type="password" placeholder="Votre code secret" required />
+                              <Label htmlFor="pin">Code PIN</Label>
+                              <Input
+                                id="pin"
+                                type="password"
+                                value={pin}
+                                onChange={(e) => setPin(e.target.value)}
+                                placeholder="Votre code secret"
+                                required
+                              />
                               <p className="text-xs text-gray-500 mt-1">
-                                Le code secret est celui que vous utilisez habituellement pour vos transactions Mobile
-                                Money
+                                Le code secret est celui que vous utilisez habituellement pour vos transactions Mobile Money
                               </p>
                             </div>
+
                             <div className="flex items-center gap-2 text-sm text-gray-500">
                               <Lock className="h-4 w-4" />
                               <span>Vous recevrez un SMS de confirmation pour valider votre paiement</span>
                             </div>
+
                             <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700">
-                              Procéder au Paiement
+                              Finaliser l&apos;achat - {price}
                             </Button>
                           </form>
                         )}
@@ -276,7 +373,7 @@ export default function PaiementPage() {
                             <p className="text-sm text-gray-500 mt-2">Veuillez ne pas fermer cette page</p>
                           </div>
                         ) : (
-                          <form onSubmit={handleSubmit} className="space-y-6">
+                          <form onSubmit={handleMobileMoneySubmit} className="space-y-6">
                             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
                               <h3 className="font-semibold text-blue-800 mb-2">Coordonnées bancaires</h3>
                               <div className="space-y-2 text-sm">
@@ -359,7 +456,7 @@ export default function PaiementPage() {
                             <p className="text-sm text-gray-500 mt-2">Veuillez ne pas fermer cette page</p>
                           </div>
                         ) : (
-                          <form onSubmit={handleSubmit} className="space-y-6">
+                          <form onSubmit={handleMobileMoneySubmit} className="space-y-6">
                             <div className="space-y-2">
                               <Label htmlFor="paypalEmail">Email PayPal</Label>
                               <Input id="paypalEmail" type="email" placeholder="votre@email.com" required />
@@ -426,7 +523,7 @@ export default function PaiementPage() {
                     </div>
                     <div className="flex justify-between font-bold text-lg pt-2 border-t">
                       <span>Total</span>
-                      <span>655 000 FCFA</span>
+                      <span>{price}</span>
                     </div>
                   </div>
                   <div className="pt-4 border-t">
