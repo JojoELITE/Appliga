@@ -104,7 +104,7 @@ export default function Home() {
                 <Badge className="bg-blue-600 text-white hover:bg-blue-700 text-lg px-4 py-2">RÉDUCTION -30%</Badge>
                 <div className="mt-6 flex flex-col sm:flex-row gap-4">
                   <Button asChild size="lg" className="bg-amber-500 hover:bg-amber-600 text-white">
-                    <Link href="/contact">Acheter Maintenant</Link>
+                    <Link href="/paiement">Acheter Maintenant</Link>
                   </Button>
                   <Button
                     asChild

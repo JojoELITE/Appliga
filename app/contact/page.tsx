@@ -26,7 +26,7 @@ export default function ContactPage() {
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<string | null>(null)
   const [formSubmitted, setFormSubmitted] = useState(false)
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: { preventDefault: () => void }) => {
     e.preventDefault()
     // Simuler l'envoi du formulaire
     setFormSubmitted(true)

@@ -39,13 +39,13 @@ export default function Header() {
           <Link href="/a-propos" className="text-sm font-medium hover:text-blue-600 transition-colors">
             À Propos
           </Link>
-          <Link href="/contact" className="text-sm font-medium hover:text-blue-600 transition-colors">
+          <Link href="/paiement" className="text-sm font-medium hover:text-blue-600 transition-colors">
             Contact
           </Link>
         </nav>
         <div className="flex items-center gap-4">
           <Button asChild className="hidden md:flex bg-blue-600 hover:bg-blue-700">
-            <Link href="/contact">Acheter Maintenant</Link>
+            <Link href="/paiement">Acheter Maintenant</Link>
           </Button>
           <Sheet open={isOpen} onOpenChange={setIsOpen}>
             <SheetTrigger asChild className="md:hidden">

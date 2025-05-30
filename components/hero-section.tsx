@@ -21,7 +21,7 @@ export default function HeroSection() {
             </div>
             <div className="flex flex-col sm:flex-row gap-4 min-[400px]:items-start">
               <Button asChild size="lg" className="bg-blue-600 hover:bg-blue-700">
-                <Link href="/contact">Acheter Maintenant</Link>
+                <Link href="/paiement">Acheter Maintenant</Link>
               </Button>
               <Button asChild variant="outline" size="lg" className="border-blue-600 text-blue-600 hover:bg-blue-50">
                 <Link href="/demo">Voir la Démo</Link>

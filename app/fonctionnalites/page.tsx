@@ -282,7 +282,7 @@ export default function FonctionnalitesPage() {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 mt-6">
               <Button asChild size="lg" className="bg-amber-500 hover:bg-amber-600 text-white">
-                <Link href="/contact">Acheter Maintenant</Link>
+                <Link href="/paiement">Acheter Maintenant</Link>
               </Button>
               <Button asChild variant="outline" size="lg" className="border-white text-white hover:bg-white/10">
                 <Link href="/demo">Voir la Démo</Link>

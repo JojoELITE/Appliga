@@ -1,0 +1,88 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Order {
+  id                     String   @id @default(cuid())
+  reference              String   @unique
+  fullName               String  
+  payerMsisdn            String   // 👈 Ajout de ce champ
+ // Ajouté pour stocker le nom complet
+  payerEmail             String
+  payerPhone             String   // Renommé de payerMsisdn pour plus de clarté
+  shortDescription       String
+  amount                 Float
+  paymentMethod          String   // "AIRTEL_MONEY", "MOOV_MONEY", etc.
+  status                 String   @default("PENDING") // "PENDING", "COMPLETED", "FAILED"
+  server_transaction_id  String?
+  bill_id                String?
+  productId              String?
+  product                Product? @relation(fields: [productId], references: [id])
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
+  invoices               Invoice[]
+}
+
+model Invoice {
+  id             String   @id @default(cuid())
+  invoiceNumber  String   @unique
+  status         String   @default("PENDING") // "DRAFT", "PENDING", "PAID", "CANCELLED"
+  totalAmount    Float
+  taxAmount      Float    @default(0)
+  totalWithTax   Float
+  orderId        String?
+  order          Order?   @relation(fields: [orderId], references: [id])
+  items          InvoiceItem[]
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model InvoiceItem {
+  id          String   @id @default(cuid())
+  description String
+  quantity    Int      @default(1)
+  unitPrice   Float
+  totalPrice  Float
+  invoiceId   String
+  invoice     Invoice @relation(fields: [invoiceId], references: [id])
+  productId   String?
+  product     Product? @relation(fields: [productId], references: [id])
+  createdAt   DateTime @default(now())
+}
+
+model Product {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  price       Float
+  orders      Order[]
+  invoiceItems InvoiceItem[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model TransactionLog {
+  id              String   @id @default(cuid())
+  transactionId   String
+  status          String
+  paymentMethod   String
+  amount          Float
+  phoneNumber     String
+  email           String
+  metadata        Json?
+  errorMessage    String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([transactionId])
+  @@index([phoneNumber])
+  @@index([email])
+}
